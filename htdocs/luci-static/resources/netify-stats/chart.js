@@ -13,7 +13,6 @@ var callQuery = rpc.declare({
     expect: { }
 });
 
-// Load the vendored Chart.js UMD once (sets window.Chart).
 function loadChart() {
     if (window.Chart) return Promise.resolve(window.Chart);
     return new Promise(function (resolve, reject) {
@@ -25,18 +24,83 @@ function loadChart() {
     });
 }
 
-var RANGES = [ '1h', '1d', '30d' ];
+var RANGES  = [ '1h', '1d', '30d' ];
 var METRICS = [ 'rx_bytes', 'tx_bytes', 'pkts', 'flows' ];
 
+// Pure state machine. Mutates state.hidden and state.isolated in place.
+// Each label lives in at most one set at a time.
+function handleLegendClick(label, state) {
+    if (state.isolated.size > 0) {
+        if (state.isolated.has(label)) {
+            state.isolated.delete(label);
+            if (state.isolated.size === 0) state.hidden.clear();
+        } else if (state.hidden.has(label)) {
+            state.hidden.delete(label);
+            state.isolated.add(label);
+        } else {
+            state.isolated.add(label);
+        }
+    } else {
+        if (state.hidden.has(label)) {
+            state.hidden.delete(label);
+            state.isolated.add(label);
+        } else {
+            state.hidden.add(label);
+        }
+    }
+}
+
+function loadPrefs(dimension, state) {
+    try {
+        var raw = localStorage.getItem('nsp-pref-' + dimension);
+        if (!raw) return;
+        var p = JSON.parse(raw);
+        if (p.range   && RANGES.indexOf(p.range)   !== -1) state.range   = p.range;
+        if (p.metric  && METRICS.indexOf(p.metric)  !== -1) state.metric  = p.metric;
+        if (Array.isArray(p.hidden))   state.hidden   = new Set(p.hidden);
+        if (Array.isArray(p.isolated)) state.isolated = new Set(p.isolated);
+    } catch (e) {}
+}
+
+function savePrefs(dimension, state) {
+    try {
+        localStorage.setItem('nsp-pref-' + dimension, JSON.stringify({
+            range:    state.range,
+            metric:   state.metric,
+            hidden:   Array.from(state.hidden),
+            isolated: Array.from(state.isolated)
+        }));
+    } catch (e) {}
+}
+
+function applyVisibility(chart, state) {
+    chart.data.datasets.forEach(function (dataset, i) {
+        var meta = chart.getDatasetMeta(i);
+        if (state.isolated.size > 0) {
+            meta.hidden = !state.isolated.has(dataset.label);
+        } else {
+            meta.hidden = state.hidden.has(dataset.label);
+        }
+    });
+    var btn = document.getElementById('nsp-reset');
+    if (btn) btn.disabled = (state.hidden.size === 0 && state.isolated.size === 0);
+    chart.update('none');
+}
+
 return baseclass.extend({
+    __test__: { handleLegendClick: handleLegendClick, loadPrefs: loadPrefs, savePrefs: savePrefs },
+
     render: function (dimension, title) {
         return view.extend({
             chart: null,
-            state: { metric: 'rx_bytes', range: '1h' },
+            state: { metric: 'rx_bytes', range: '1h', hidden: new Set(), isolated: new Set() },
 
-            load: function () { return loadChart(); },
+            load: function () {
+                var self = this;
+                loadPrefs(dimension, self.state);
+                return loadChart();
+            },
 
-            // Query + (re)draw into the canvas.
             refresh: function () {
                 var self = this;
                 return callQuery(dimension, self.state.metric, self.state.range, [])
@@ -57,7 +121,16 @@ return baseclass.extend({
                                 responsive: true, maintainAspectRatio: false, animation: false,
                                 interaction: { mode: 'index', intersect: false },
                                 scales: { y: { stacked: true, beginAtZero: true }, x: { ticks: { maxTicksLimit: 8 } } },
-                                plugins: { legend: { position: 'bottom' } }
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        onClick: function (e, legendItem) {
+                                            handleLegendClick(legendItem.text, self.state);
+                                            savePrefs(dimension, self.state);
+                                            applyVisibility(self.chart, self.state);
+                                        }
+                                    }
+                                }
                             }
                         };
                         if (self.chart) {
@@ -67,6 +140,7 @@ return baseclass.extend({
                             var ctx = document.getElementById('nsp-canvas').getContext('2d');
                             self.chart = new window.Chart(ctx, cfg);
                         }
+                        applyVisibility(self.chart, self.state);
                     })
                     .catch(function (e) {
                         ui.addNotification(null, E('p', _('netify-stats query failed: %s').format(e.message)), 'warning');
@@ -85,6 +159,7 @@ return baseclass.extend({
                             ev.target.parentNode.querySelectorAll('button').forEach(function (b) {
                                 b.classList.toggle('cbi-button-action', b.getAttribute('data-range') === r);
                             });
+                            savePrefs(dimension, self.state);
                             self.refresh();
                         }
                     }, r);
@@ -92,17 +167,37 @@ return baseclass.extend({
 
                 var metricSel = E('select', {
                     'class': 'cbi-input-select',
-                    'change': function (ev) { self.state.metric = ev.target.value; self.refresh(); }
+                    'change': function (ev) {
+                        self.state.metric = ev.target.value;
+                        savePrefs(dimension, self.state);
+                        self.refresh();
+                    }
                 }, METRICS.map(function (m) {
                     return E('option', { 'value': m, 'selected': m === self.state.metric ? '' : null }, m);
                 }));
+
+                var resetBtn = E('button', {
+                    'id': 'nsp-reset',
+                    'class': 'btn',
+                    'disabled': true,
+                    'click': function () {
+                        self.state.hidden.clear();
+                        self.state.isolated.clear();
+                        savePrefs(dimension, self.state);
+                        if (self.chart) applyVisibility(self.chart, self.state);
+                    }
+                }, _('Reset view'));
 
                 var node = E('div', { 'class': 'cbi-map' }, [
                     E('h2', {}, title),
                     E('div', { 'class': 'cbi-section' }, [
                         E('div', { 'style': 'display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px' }, [
                             E('div', { 'class': 'btn-group' }, rangeBtns),
-                            E('div', {}, [ E('span', { 'class': 'label', 'style': 'margin-right:6px' }, _('Metric')), metricSel ])
+                            E('div', { 'style': 'display:flex;align-items:center;gap:8px' }, [
+                                E('span', { 'class': 'label', 'style': 'margin-right:6px' }, _('Metric')),
+                                metricSel,
+                                resetBtn
+                            ])
                         ]),
                         E('div', { 'id': 'nsp-chartbox', 'style': 'position:relative;height:340px' }, [
                             E('canvas', { 'id': 'nsp-canvas' }),
@@ -111,7 +206,6 @@ return baseclass.extend({
                     ])
                 ]);
 
-                // initial draw + live refresh on the 1h range
                 self.refresh();
                 poll.add(function () { if (self.state.range === '1h') return self.refresh(); }, 10);
 
