@@ -135,7 +135,7 @@ return baseclass.extend({
                         };
                         if (self.chart) {
                             self.chart.data = cfg.data;
-                            self.chart.update();
+                            // do NOT call chart.update() here — applyVisibility below calls chart.update('none')
                         } else {
                             var ctx = document.getElementById('nsp-canvas').getContext('2d');
                             self.chart = new window.Chart(ctx, cfg);
