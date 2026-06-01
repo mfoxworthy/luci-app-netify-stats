@@ -59,6 +59,7 @@ function loadPrefs(dimension, state) {
         if (p.metric  && METRICS.indexOf(p.metric)  !== -1) state.metric  = p.metric;
         if (Array.isArray(p.hidden))   state.hidden   = new Set(p.hidden);
         if (Array.isArray(p.isolated)) state.isolated = new Set(p.isolated);
+        state.hidden.forEach(function (k) { state.isolated.delete(k); });
     } catch (e) {}
 }
 
@@ -93,10 +94,10 @@ return baseclass.extend({
     render: function (dimension, title) {
         return view.extend({
             chart: null,
-            state: { metric: 'rx_bytes', range: '1h', hidden: new Set(), isolated: new Set() },
 
             load: function () {
                 var self = this;
+                self.state = { metric: 'rx_bytes', range: '1h', hidden: new Set(), isolated: new Set() };
                 loadPrefs(dimension, self.state);
                 return loadChart();
             },
