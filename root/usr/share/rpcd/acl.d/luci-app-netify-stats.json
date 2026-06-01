@@ -1,0 +1,10 @@
+{
+	"luci-app-netify-stats": {
+		"description": "View netify per-application statistics",
+		"read": {
+			"ubus": {
+				"luci.netify-stats": [ "query" ]
+			}
+		}
+	}
+}
