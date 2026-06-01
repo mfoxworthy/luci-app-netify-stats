@@ -1,4 +1,5 @@
 'use strict';
+'require baseclass';
 'require view';
 'require rpc';
 'require ui';
@@ -27,7 +28,7 @@ function loadChart() {
 var RANGES = [ '1h', '1d', '30d' ];
 var METRICS = [ 'rx_bytes', 'tx_bytes', 'pkts', 'flows' ];
 
-return {
+return baseclass.extend({
     render: function (dimension, title) {
         return view.extend({
             chart: null,
@@ -120,4 +121,4 @@ return {
             handleSaveApply: null, handleSave: null, handleReset: null
         });
     }
-};
+});
