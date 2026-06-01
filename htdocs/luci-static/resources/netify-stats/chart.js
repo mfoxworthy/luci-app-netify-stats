@@ -27,7 +27,7 @@ function loadChart() {
 var RANGES = [ '1h', '1d', '30d' ];
 var METRICS = [ 'rx_bytes', 'tx_bytes', 'pkts', 'flows' ];
 
-return baseclass = {
+return {
     render: function (dimension, title) {
         return view.extend({
             chart: null,
@@ -121,8 +121,3 @@ return baseclass = {
         });
     }
 };
-
-// **On-device verification notes (Task 8 confirms; adjust if the LuCI runtime differs):**
-// 1. `'require netify-stats.transform as T'` — confirm LuCI resolves a non-view resource module under `luci-static/resources/netify-stats/transform.js`. If the `as` alias or path differs, adjust the require and the `T.` references.
-// 2. `return baseclass = {...}` exposing a plain object with `render()` — confirm consumers can `'require ... as chart'` then `chart.render(...)`. If LuCI requires a `baseclass.extend`, wrap accordingly (`'require baseclass'; return baseclass.extend({ render: ... })`).
-// 3. `poll.add(fn, 10)` signature and `L.resource()` path helper — both standard, confirm on the target LuCI version.
