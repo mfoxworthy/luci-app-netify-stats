@@ -160,6 +160,11 @@ return baseclass.extend({
             render: function (data) {
                 var self = this;
 
+                if (self.state.iface && (!data || !data.ifaces || data.ifaces.indexOf(self.state.iface) === -1)) {
+                    self.state.iface = '';
+                    savePrefs(dimension, self.state);
+                }
+
                 var rangeBtns = RANGES.map(function (r) {
                     return E('button', {
                         'class': 'btn' + (r === self.state.range ? ' cbi-button-action' : ''),
@@ -193,7 +198,7 @@ return baseclass.extend({
                         savePrefs(dimension, self.state);
                         self.refresh();
                     }
-                }, [ E('option', { value: '' }, _('All interfaces')) ]
+                }, [ E('option', { value: '', selected: self.state.iface === '' ? '' : null }, _('All interfaces')) ]
                     .concat(data.ifaces.map(function (f) {
                         return E('option', { value: f, selected: f === self.state.iface ? '' : null }, f);
                     }))
