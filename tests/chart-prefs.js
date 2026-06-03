@@ -41,7 +41,7 @@ let n = 0;
 const ok = (name, cond) => { assert.ok(cond, name); n++; };
 
 function makeState() {
-    return { range: '1h', metric: 'rx_bytes', hidden: new Set(), isolated: new Set() };
+    return { range: '1h', metric: 'rx_bytes', iface: '', hidden: new Set(), isolated: new Set() };
 }
 
 // ── handleLegendClick ──────────────────────────────────────────────────────
@@ -146,5 +146,23 @@ store = {};
 store['nsp-pref-apps'] = '{not: valid json';
 let s6 = makeState(); loadPrefs('apps', s6);
 ok('prefs: corrupt JSON is noop', s6.range === '1h');
+
+// iface round-trips: specific interface
+store = {};
+s = makeState();
+s.iface = 'wan';
+savePrefs('apps', s);
+let si_wan = makeState();
+loadPrefs('apps', si_wan);
+ok('prefs: iface "wan" round-trips', si_wan.iface === 'wan');
+
+// iface round-trips: "All interfaces" (empty string)
+store = {};
+s = makeState();
+s.iface = '';
+savePrefs('apps', s);
+let si_all = makeState();
+loadPrefs('apps', si_all);
+ok('prefs: iface "" (All) round-trips', si_all.iface === '');
 
 console.log('chart-prefs: ' + n + ' checks passed');
