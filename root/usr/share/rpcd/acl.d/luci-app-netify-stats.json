@@ -3,7 +3,7 @@
 		"description": "View netify per-application statistics",
 		"read": {
 			"ubus": {
-				"luci.netify-stats": [ "query" ]
+				"luci.netify-stats": [ "query", "list_interfaces" ]
 			}
 		}
 	}
