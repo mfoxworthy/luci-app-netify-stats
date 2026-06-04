@@ -162,6 +162,7 @@ s = makeState();
 s.iface = '';
 savePrefs('apps', s);
 let si_all = makeState();
+si_all.iface = '__sentinel__';
 loadPrefs('apps', si_all);
 ok('prefs: iface "" (All) round-trips', si_all.iface === '');
 
