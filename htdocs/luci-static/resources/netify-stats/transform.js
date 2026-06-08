@@ -3,11 +3,19 @@
 
 var OTHER_COLOR = 'rgb(150, 150, 150)';
 
+// Strip the 'netify.' vendor prefix that netifyd prepends to app names.
+function cleanName(name) {
+    if (!name) return name;
+    return name.indexOf('netify.') === 0 ? name.slice(7) : name;
+}
+
 // Stable name -> color (golden-angle hue hash). __other__ is fixed grey.
+// Uses the cleaned name so colors are stable across raw/prefixed names.
 function colorFor(name) {
     if (name === '__other__') return OTHER_COLOR;
     var h = 0;
-    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    var clean = cleanName(name);
+    for (var i = 0; i < clean.length; i++) h = (h * 31 + clean.charCodeAt(i)) >>> 0;
     var hue = (h % 360);
     return 'hsl(' + hue + ', 65%, 55%)';
 }
@@ -46,7 +54,7 @@ function transform(resp, range) {
     var datasets = ordered.map(function (s) {
         var c = colorFor(s.name);
         return {
-            label: s.name,
+            label: cleanName(s.name),
             data: (s.values || []).slice(),
             backgroundColor: c,
             borderColor: c,
@@ -62,6 +70,7 @@ function transform(resp, range) {
 
 return baseclass.extend({
     OTHER_COLOR: OTHER_COLOR,
+    cleanName: cleanName,
     colorFor: colorFor,
     fmtLabel: fmtLabel,
     transform: transform

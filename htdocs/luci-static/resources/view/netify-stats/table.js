@@ -160,7 +160,7 @@ return view.extend({
             var isOther = row.name === '__other__';
             var pct     = Math.round((row.total / maxTotal) * 100);
             var color   = T.colorFor(row.name);
-            var label   = isOther ? _('(other)') : row.name;
+            var label   = isOther ? _('(other)') : T.cleanName(row.name);
 
             tbody.appendChild(E('tr', {}, [
                 E('td', { style: 'padding:4px 8px;color:' + color + ';white-space:nowrap' }, label),
