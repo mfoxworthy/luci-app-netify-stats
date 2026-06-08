@@ -4,6 +4,12 @@
 		"order": 80,
 		"action": { "type": "firstchild" }
 	},
+	"admin/statistics/netify_dashboard": {
+		"title": "Netify Dashboard",
+		"order": 89,
+		"action": { "type": "view", "path": "netify-stats/dashboard" },
+		"depends": { "acl": [ "luci-app-netify-stats" ] }
+	},
 	"admin/statistics/netify_overview": {
 		"title": "Netify Overview",
 		"order": 90,
