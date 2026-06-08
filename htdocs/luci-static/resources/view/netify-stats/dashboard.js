@@ -21,6 +21,18 @@ var callResetLive = rpc.declare({
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+
+function loadChart() {
+    if (window.Chart) return Promise.resolve(window.Chart);
+    return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = L.resource('netify-stats/chart.min.js');
+        s.onload = function () { resolve(window.Chart); };
+        s.onerror = function () { reject(new Error('failed to load Chart.js')); };
+        document.head.appendChild(s);
+    });
+}
+
 function fmtBytes(n) {
     if (!n) return '0 B';
     if (n < 1024) return n + ' B';
@@ -110,7 +122,7 @@ return view.extend({
 
     load: function () {
         this._prefs = loadPrefs();
-        return callQueryLive();
+        return Promise.all([callQueryLive(), loadChart()]).then(function(r) { return r[0]; });
     },
 
     refresh: function () {
