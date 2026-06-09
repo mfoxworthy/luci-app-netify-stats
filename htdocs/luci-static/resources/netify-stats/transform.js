@@ -3,9 +3,10 @@
 
 var OTHER_COLOR = 'rgb(150, 150, 150)';
 
-// Strip the 'netify.' vendor prefix that netifyd prepends to app names.
+// Strip the 'netify.' vendor prefix; map numeric fallback names to 'Unidentified'.
 function cleanName(name) {
     if (!name) return name;
+    if (/^(app|cat)-\d+$/.test(name)) return 'Unidentified';
     return name.indexOf('netify.') === 0 ? name.slice(7) : name;
 }
 
