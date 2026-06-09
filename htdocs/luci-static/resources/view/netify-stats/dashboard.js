@@ -100,7 +100,7 @@ function makeDonut(canvas, labels, values, colors, tooltipCallbacks) {
         type: 'doughnut',
         data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 1 }] },
         options: {
-            responsive: false, animation: false, cutout: '60%',
+            responsive: false, animation: false, cutout: '45%',
             plugins: {
                 legend: { display: false },
                 tooltip: tooltipCallbacks
@@ -322,7 +322,7 @@ return view.extend({
                 }
             }, [
                 E('td', { 'style': 'padding:4px 8px' }, '▶ ' + display),
-                E('td', { 'style': 'padding:4px 8px' }, canvas),
+                E('td', { 'style': 'padding:4px 8px;text-align:center' }, canvas),
                 E('td', { 'style': 'padding:4px 8px;text-align:right;white-space:nowrap' }, fmtBytes(host.rx)),
                 E('td', { 'style': 'padding:4px 8px;text-align:right;white-space:nowrap' }, fmtBytes(host.tx))
             ]);
