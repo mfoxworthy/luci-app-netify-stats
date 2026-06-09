@@ -335,7 +335,7 @@ return view.extend({
         setTimeout(function () {
             var el = document.querySelector('[data-chartid="global-' + title + '"]');
             if (window.Chart && el && series.length > 0)
-                makeDonut(el, series.map(function (s) { return s.name; }),
+                makeDonut(el, series.map(function (s) { return T.cleanName(s.name); }),
                               series.map(function (s) { return s.rx + s.tx; }),
                               series.map(function (s) { return T.colorFor(s.name); }),
                               tooltipCallbacks);
@@ -415,7 +415,7 @@ return view.extend({
                 .sort(function (a, b) { return (b.rx + b.tx) - (a.rx + a.tx); })
                 .map(function (a) {
                     return E('tr', { 'data-detail': String(idx), 'style': 'display:none;background:#f8f8f8' }, [
-                        E('td', { 'style': 'padding:2px 8px 2px 32px;color:' + T.colorFor(a.name) }, a.name),
+                        E('td', { 'style': 'padding:2px 8px 2px 32px;color:' + T.colorFor(a.name) }, T.cleanName(a.name)),
                         E('td'),
                         E('td', { 'style': 'padding:2px 8px;text-align:right;white-space:nowrap' }, fmtBytes(a.rx)),
                         E('td', { 'style': 'padding:2px 8px;text-align:right;white-space:nowrap' }, fmtBytes(a.tx))
