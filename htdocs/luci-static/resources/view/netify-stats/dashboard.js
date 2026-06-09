@@ -296,7 +296,7 @@ return view.extend({
             var canvas   = E('canvas', {
                 'width': '56', 'height': '56',
                 'data-chartid': canvasId,
-                'style': 'vertical-align:middle'
+                'style': 'display:block;margin:0 auto'
             });
 
             setTimeout(function () {
@@ -316,9 +316,9 @@ return view.extend({
             var mainRow = E('tr', {
                 'style': 'cursor:pointer',
                 'click': function () {
-                    var detail = tbody.querySelector('tr[data-detail="' + idx + '"]');
-                    if (detail)
-                        detail.style.display = detail.style.display === 'none' ? '' : 'none';
+                    tbody.querySelectorAll('tr[data-detail="' + idx + '"]').forEach(function (r) {
+                        r.style.display = r.style.display === 'none' ? '' : 'none';
+                    });
                 }
             }, [
                 E('td', { 'style': 'padding:4px 8px' }, '▶ ' + display),
@@ -330,22 +330,17 @@ return view.extend({
             var detailApps = (host.apps || []).slice().sort(function (a, b) {
                 return (b.rx + b.tx) - (a.rx + a.tx);
             });
-            var detailInner = detailApps.map(function (a) {
-                return E('tr', { 'style': 'background:#f8f8f8' }, [
-                    E('td', { 'style': 'padding:2px 8px 2px 32px;color:' + T.colorFor(a.name), 'colspan': '2' }, a.name),
+            var detailRows = detailApps.map(function (a) {
+                return E('tr', { 'data-detail': String(idx), 'style': 'display:none;background:#f8f8f8' }, [
+                    E('td', { 'style': 'padding:2px 8px 2px 32px;color:' + T.colorFor(a.name) }, a.name),
+                    E('td'),
                     E('td', { 'style': 'padding:2px 8px;text-align:right;white-space:nowrap' }, fmtBytes(a.rx)),
                     E('td', { 'style': 'padding:2px 8px;text-align:right;white-space:nowrap' }, fmtBytes(a.tx))
                 ]);
             });
 
-            var detailRow = E('tr', { 'data-detail': String(idx), 'style': 'display:none' }, [
-                E('td', { 'colspan': '4', 'style': 'padding:0' },
-                    E('table', { 'style': 'width:100%;border-collapse:collapse' }, detailInner)
-                )
-            ]);
-
             tbody.appendChild(mainRow);
-            tbody.appendChild(detailRow);
+            detailRows.forEach(function (r) { tbody.appendChild(r); });
         });
 
         return E('table', { 'style': 'width:100%;border-collapse:collapse' }, [ thead, tbody ]);
