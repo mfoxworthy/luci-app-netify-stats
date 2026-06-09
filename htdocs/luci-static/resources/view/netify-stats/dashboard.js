@@ -216,7 +216,7 @@ return view.extend({
         });
 
         var canvas = E('canvas', {
-            'width': '200', 'height': '200',
+            'width': '200', 'height': '200', 'style': 'display:block;margin:0 auto',
             'data-chartid': 'global-' + title
         });
 
@@ -265,10 +265,10 @@ return view.extend({
 
         var tbody = E('tbody', {});
 
-        function thSort(label, col) {
+        function thSort(label, col, align) {
             var arrow = prefs.sortCol === col ? (prefs.sortDir === 'desc' ? ' ↓' : ' ↑') : '';
             return E('th', {
-                'style': 'cursor:pointer;padding:6px 8px;user-select:none;text-align:left',
+                'style': 'cursor:pointer;padding:6px 8px;user-select:none;text-align:' + (align || 'left'),
                 'click': function () {
                     prefs.sortDir = (prefs.sortCol === col && prefs.sortDir === 'desc') ? 'asc' : 'desc';
                     prefs.sortCol = col;
@@ -285,9 +285,9 @@ return view.extend({
 
         var thead = E('thead', {}, E('tr', {}, [
             thSort(_('Host'), 'mac'),
-            E('th', { 'style': 'padding:6px 8px' }, _('Top Apps')),
-            thSort(_('RX'), 'rx'),
-            thSort(_('TX'), 'tx')
+            E('th', { 'style': 'padding:6px 8px;text-align:center' }, _('Top Apps')),
+            thSort(_('RX'), 'rx', 'right'),
+            thSort(_('TX'), 'tx', 'right')
         ]));
 
         sorted.forEach(function (host, idx) {
