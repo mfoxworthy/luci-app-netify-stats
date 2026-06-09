@@ -7,25 +7,7 @@
 	"admin/statistics/netify_dashboard": {
 		"title": "Netify Dashboard",
 		"order": 89,
-		"action": { "type": "view", "path": "netify-stats/dashboard" },
-		"depends": { "acl": [ "luci-app-netify-stats" ] }
-	},
-	"admin/statistics/netify_overview": {
-		"title": "Netify Overview",
-		"order": 90,
-		"action": { "type": "view", "path": "netify-stats/overview" },
-		"depends": { "acl": [ "luci-app-netify-stats" ] }
-	},
-	"admin/statistics/netify_categories": {
-		"title": "Netify Categories",
-		"order": 91,
-		"action": { "type": "view", "path": "netify-stats/categories" },
-		"depends": { "acl": [ "luci-app-netify-stats" ] }
-	},
-	"admin/statistics/netify_table": {
-		"title": "Netify Bandwidth",
-		"order": 92,
-		"action": { "type": "view", "path": "netify-stats/table" },
+		"action": { "type": "view", "path": "netify-stats/main" },
 		"depends": { "acl": [ "luci-app-netify-stats" ] }
 	}
 }
