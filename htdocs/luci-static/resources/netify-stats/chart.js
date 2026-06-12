@@ -140,6 +140,11 @@ return baseclass.extend({
                                             savePrefs(dimension, self.state);
                                             applyVisibility(self.chart, self.state);
                                         }
+                                    },
+                                    tooltip: {
+                                        filter: function (item) {
+                                            return item.parsed.y > 0;
+                                        }
                                     }
                                 }
                             }

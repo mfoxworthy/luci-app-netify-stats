@@ -520,13 +520,16 @@ return view.extend({
                         responsive: true, maintainAspectRatio: false, animation: false,
                         interaction: { mode: 'index', intersect: false },
                         scales: { y: { stacked: true, beginAtZero: true }, x: { ticks: { maxTicksLimit: 8 } } },
-                        plugins: { legend: { position: 'bottom', onClick: function (e, item) {
-                            handleLegendClick(item.text, state);
-                            saveChartState(self._prefs, dim, state);
-                            applyVisibility(self._charts[dim], state);
-                            var btn = document.getElementById('nsp-chart-reset-' + dim);
-                            if (btn) btn.disabled = (state.hidden.size === 0 && state.isolated.size === 0);
-                        }}}
+                        plugins: {
+                            legend: { position: 'bottom', onClick: function (e, item) {
+                                handleLegendClick(item.text, state);
+                                saveChartState(self._prefs, dim, state);
+                                applyVisibility(self._charts[dim], state);
+                                var btn = document.getElementById('nsp-chart-reset-' + dim);
+                                if (btn) btn.disabled = (state.hidden.size === 0 && state.isolated.size === 0);
+                            }},
+                            tooltip: { filter: function (item) { return item.parsed.y > 0; } }
+                        }
                     }
                 };
                 if (self._charts[dim]) {
